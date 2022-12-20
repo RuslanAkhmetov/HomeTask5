@@ -9,7 +9,6 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.geekbrain.android.withKotlin.databinding.ActivityMainWebviewBinding
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.MalformedURLException
 import java.net.URL
@@ -19,6 +18,8 @@ import javax.net.ssl.HttpsURLConnection
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainWebviewBinding
+
+    private val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         override fun onClick(v: View?) {
             try {
                 val uri = URL(binding.url.text.toString())
+                
                 val handler = Handler()
                 Thread {
 
@@ -49,22 +51,20 @@ class MainActivity : AppCompatActivity() {
                         lateinit var reader: BufferedReader
                         if (responseStatusCode != HttpsURLConnection.HTTP_OK) {
                             reader = BufferedReader(InputStreamReader(urlConnection.errorStream))
-                            Log.i("", "HttpsURLConnection: $responseStatusCode ")
+                            Log.i(TAG, "HttpsURLConnection: $responseStatusCode ")
                         } else{
                             reader = BufferedReader(InputStreamReader(urlConnection.inputStream))
 
                         }
-                        var result = ""
-                        result = reader.let { getLines(it) }
-
-
+                        val result = reader.let { getLines(it) }
 
                         handler.post {
-
-                            binding.webview.loadData(
+                            binding.webview.loadDataWithBaseURL(
+                                null,
                                 result,
                                 "text/html; charset=utf-8",
-                                "utf-8"
+                                "utf-8",
+                                null
                             )
                         }
 
